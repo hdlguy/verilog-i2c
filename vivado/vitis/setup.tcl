@@ -10,14 +10,24 @@ set proc "microblaze_0"
 
 setws ./workspace
 
-platform create -name "standalone_plat" -hw $hw -proc $proc -os standalone
-bsp config stdout "usb_uartlite"
-bsp config stdin  "usb_uartlite"
+#platform create -name {standalone_plat} -hw {/home/pedro/github/verilog-i2c/vivado/implement/results/top.xsa} -proc {microblaze_0} -os {standalone} -out {/home/pedro/github/verilog-i2c/vivado/vitis/workspace};platform write
+#platform read {/home/pedro/github/verilog-i2c/vivado/vitis/workspace/standalone_plat/platform.spr}
+#platform active {standalone_plat}
+
+platform create -name standalone_plat -hw $hw -proc $proc -os standalone 
+#platform create -name standalone_plat -hw /home/pedro/github/verilog-i2c/vivado/implement/results/top.xsa -proc "microblaze_0" -os standalone 
+#platform write
+#platform read {/home/pedro/github/verilog-i2c/vivado/vitis/workspace/standalone_plat/platform.spr}
+#platform active {standalone_plat}
 
 
-#app create -name hello1 -platform standalone_plat -domain standalone_domain -template "Empty Application(C)"
-#file link -symbolic ./workspace/hello1/src/test.c               ../../../src/hello1/test.c
-#file link -symbolic ./workspace/hello1/src/fpga.h               ../../../src/fpga.h
+#platform create -name "standalone_plat" -hw $hw -proc $proc -os standalone
+#bsp config stdout "usb_uartlite"
+#bsp config stdin  "usb_uartlite"
 
-#app build all
+app create -name hello1 -platform standalone_plat -domain standalone_domain -template "Empty Application(C)"
+file link -symbolic ./workspace/hello1/src/test.c               ../../../src/hello1/test.c
+file link -symbolic ./workspace/hello1/src/fpga.h               ../../../src/fpga.h
+
+app build all
 
