@@ -69,7 +69,7 @@ module top (
         .clk            (axi_aclk),
         .rst            (~axi_aresetn),
         // axi lite interface
-        .s_axil_awaddr  (M00_araddr[3:0]),
+        .s_axil_awaddr  (M00_awaddr[3:0]),
         .s_axil_awprot  (M00_awprot),
         .s_axil_awvalid (M00_awvalid),
         .s_axil_awready (M00_awready),
@@ -131,6 +131,9 @@ module top (
         .M00_wstrb      (M00_wstrb),
         .M00_wvalid     (M00_wvalid)
     );
+    
+    // debug
+    i2c_ila i2c_ila_inst (.clk(axi_aclk), .probe0({i2c_scl_i, i2c_scl_o, i2c_scl_t, i2c_sda_i, i2c_sda_o, i2c_sda_t}), .probe1({M00_awaddr[3:0], M00_wvalid, M00_araddr[3:0], M00_rvalid})); // 6, 10
         
 endmodule
 

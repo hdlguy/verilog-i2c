@@ -9,9 +9,9 @@ load_features ipintegrator
 tclapp::install ultrafast -quiet
 
 
-#read_ip ../source/eth_ila/eth_ila.xci
-#upgrade_ip -quiet  [get_ips *]
-#generate_target {all} [get_ips *]
+read_ip ../source/i2c_ila/i2c_ila.xci
+upgrade_ip -quiet  [get_ips *]
+generate_target {all} [get_ips *]
 
 
 # Recreate the Block Diagram of the processor system.
