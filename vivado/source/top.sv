@@ -1,8 +1,22 @@
 // The purpose of this module is to test the i2c_maste_axil module in hardware.
 
 module top (
-    input   logic       clkin100
+    input   logic       clkin100,
+    //
+    output  logic       i2c_scl,
+    output  logic       i2c_sda
 );
+
+    logic clk;
+    assign clk = clkin100;
+    
+    logic reset;
+    logic [15:0] reset_vec = 16'hFFFF;
+    always_ff @(posedge clk) begin
+        reset_vec <= {1'b0, reset_vec[15:1]};
+    end
+    assign reset  =  reset_vec[0];
+    assign resetn = ~reset_vec[0];
 
     localparam DEFAULT_PRESCALE = 1;
     localparam FIXED_PRESCALE = 0;
@@ -13,35 +27,37 @@ module top (
     localparam READ_FIFO = 1;
     localparam READ_FIFO_DEPTH = 32;
 
-    // axi lite interface
-    logic       clk;
-    logic       rst;
-    logic[3:0]  s_axil_awaddr;
-    logic[2:0]  s_axil_awprot;
-    logic       s_axil_awvalid;
-    logic       s_axil_awready;
-    logic[31:0] s_axil_wdata;
-    logic[3:0]  s_axil_wstrb;
-    logic       s_axil_wvalid;
-    logic       s_axil_wready;
-    logic[1:0]  s_axil_bresp;
-    logic       s_axil_bvalid;
-    logic       s_axil_bready;
-    logic[3:0]  s_axil_araddr;
-    logic[2:0]  s_axil_arprot;
-    logic       s_axil_arvalid;
-    logic       s_axil_arready;
-    logic[31:0] s_axil_rdata;
-    logic[1:0]  s_axil_rresp;
-    logic       s_axil_rvalid;
-    logic       s_axil_rready;
     // i2c interface
-    logic       i2c_scl_i;
-    logic       i2c_scl_o;
-    logic       i2c_scl_t;
-    logic       i2c_sda_i;
-    logic       i2c_sda_o;
-    logic       i2c_sda_t;
+    logic i2c_scl_i;
+    logic i2c_scl_o;
+    logic i2c_scl_t;
+    logic i2c_sda_i;
+    logic i2c_sda_o;
+    logic i2c_sda_t;
+    
+    logic [31:0]    M00_araddr;
+    logic [2:0]     M00_arprot;
+    logic           M00_arready;
+    logic           M00_arvalid;
+    logic [31:0]    M00_awaddr;
+    logic [2:0]     M00_awprot;
+    logic           M00_awready;
+    logic           M00_awvalid;
+    logic           M00_bready;
+    logic [1:0]     M00_bresp;
+    logic           M00_bvalid;
+    logic [31:0]    M00_rdata;
+    logic           M00_rready;
+    logic [1:0]     M00_rresp;
+    logic           M00_rvalid;
+    logic [31:0]    M00_wdata;
+    logic           M00_wready;
+    logic [3:0]     M00_wstrb;
+    logic           M00_wvalid;
+    logic axi_aclk;
+    logic [0:0]axi_aresetn;
+    logic clk;
+    logic reset_n;    
 
     i2c_master_axil #(
         .DEFAULT_PRESCALE   (DEFAULT_PRESCALE),
@@ -54,39 +70,67 @@ module top (
         .READ_FIFO_DEPTH    (READ_FIFO_DEPTH)
     ) i2c_inst (
         .clk            (),
-        .rst            (),
+        .rst            (reset),
         // axi lite interface
-        .s_axil_awaddr  (),
-        .s_axil_awprot  (),
-        .s_axil_awvalid (),
-        .s_axil_awready (),
-        .s_axil_wdata   (),
-        .s_axil_wstrb   (),
-        .s_axil_wvalid  (),
-        .s_axil_wready  (),
-        .s_axil_bresp   (),
-        .s_axil_bvalid  (),
-        .s_axil_bready  (),
-        .s_axil_araddr  (),
-        .s_axil_arprot  (),
-        .s_axil_arvalid (),
-        .s_axil_arready (),
-        .s_axil_rdata   (),
-        .s_axil_rresp   (),
-        .s_axil_rvalid  (),
-        .s_axil_rready  (),
+        .s_axil_awaddr  (M00_araddr[3:0]),
+        .s_axil_awprot  (M00_awprot),
+        .s_axil_awvalid (M00_awvalid),
+        .s_axil_awready (M00_awready),
+        .s_axil_wdata   (M00_wdata),
+        .s_axil_wstrb   (M00_wstrb),
+        .s_axil_wvalid  (M00_wvalid),
+        .s_axil_wready  (M00_wready),
+        .s_axil_bresp   (M00_bresp),
+        .s_axil_bvalid  (M00_bvalid),
+        .s_axil_bready  (M00_bready),
+        .s_axil_araddr  (M00_araddr[3:0]),
+        .s_axil_arprot  (M00_arprot),
+        .s_axil_arvalid (M00_arvalid),
+        .s_axil_arready (M00_arready),
+        .s_axil_rdata   (M00_rdata),
+        .s_axil_rresp   (M00_rresp),
+        .s_axil_rvalid  (M00_rvalid),
+        .s_axil_rready  (M00_rready),
         // i2c interface
-        .i2c_scl_i      (),
-        .i2c_scl_o      (),
-        .i2c_scl_t      (),
-        .i2c_sda_i      (),
-        .i2c_sda_o      (),
-        .i2c_sda_t      ()
+        .i2c_scl_i      (i2c_scl_i),
+        .i2c_scl_o      (i2c_scl_o),
+        .i2c_scl_t      (i2c_scl_t),
+        .i2c_sda_i      (i2c_sda_i),
+        .i2c_sda_o      (i2c_sda_o),
+        .i2c_sda_t      (i2c_sda_t)
     );
     
+    OBUFT #(.DRIVE(12), .IOSTANDARD("DEFAULT"), .SLEW("SLOW")) OBUFT_i2c_scl (.O(i2c_scl), .I(i2c_scl_i), .T(i2c_scl_t));
+    OBUFT #(.DRIVE(12), .IOSTANDARD("DEFAULT"), .SLEW("SLOW")) OBUFT_i2c_sda (.O(i2c_sda), .I(i2c_sda_i), .T(i2c_sda_t));
+    
+
+    // Microblaze Processor Block Diagram
+    system system_i (
+        .clk(clk),
+        .reset_n(resetn),
+        //
+        .M00_araddr     (M00_araddr),
+        .M00_arprot     (M00_arprot),
+        .M00_arready    (M00_arready),
+        .M00_arvalid    (M00_arvalid),
+        .M00_awaddr     (M00_awaddr),
+        .M00_awprot     (M00_awprot),
+        .M00_awready    (M00_awready),
+        .M00_awvalid    (M00_awvalid),
+        .M00_bready     (M00_bready),
+        .M00_bresp      (M00_bresp),
+        .M00_bvalid     (M00_bvalid),
+        .M00_rdata      (M00_rdata),
+        .M00_rready     (M00_rready),
+        .M00_rresp      (M00_rresp),
+        .M00_rvalid     (M00_rvalid),
+        .M00_wdata      (M00_wdata),
+        .M00_wready     (M00_wready),
+        .M00_wstrb      (M00_wstrb),
+        .M00_wvalid     (M00_wvalid)
+    );
+        
 endmodule
-
-
 
 /*
 module i2c_master_axil #

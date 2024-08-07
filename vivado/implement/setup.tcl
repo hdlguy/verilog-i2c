@@ -27,7 +27,7 @@ read_verilog -sv ../../rtl/i2c_master_axil.v
 
 read_verilog -sv ../source/top.sv
 
-#read_xdc ../../rtl/top.xdc
+read_xdc ../source/top.xdc
 
 close_project
 
