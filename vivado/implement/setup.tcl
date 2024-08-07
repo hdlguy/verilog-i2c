@@ -19,7 +19,6 @@ source ../source/system.tcl
 generate_target {synthesis implementation} [get_files ./proj.srcs/sources_1/bd/system/system.bd]
 set_property synth_checkpoint_mode None    [get_files ./proj.srcs/sources_1/bd/system/system.bd]
 
-#read_verilog -sv ../source/axi_regfile/axi_regfile_v1_0_S00_AXI.sv
 
 read_verilog -sv ../../rtl/i2c_master.v
 read_verilog -sv ../../rtl/axis_fifo.v

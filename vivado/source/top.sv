@@ -3,6 +3,9 @@
 module top (
     input   logic       clkin100,
     //
+    output  logic       usb_uart_txd,
+    input   logic       usb_uart_rxd,
+    //
     output  logic       i2c_scl,
     output  logic       i2c_sda
 );
@@ -18,23 +21,12 @@ module top (
     assign reset  =  reset_vec[0];
     assign resetn = ~reset_vec[0];
 
-    localparam DEFAULT_PRESCALE = 1;
-    localparam FIXED_PRESCALE = 0;
-    localparam CMD_FIFO = 1;
-    localparam CMD_FIFO_DEPTH = 32;
-    localparam WRITE_FIFO = 1;
-    localparam WRITE_FIFO_DEPTH = 32;
-    localparam READ_FIFO = 1;
-    localparam READ_FIFO_DEPTH = 32;
-
     // i2c interface
-    logic i2c_scl_i;
-    logic i2c_scl_o;
-    logic i2c_scl_t;
-    logic i2c_sda_i;
-    logic i2c_sda_o;
-    logic i2c_sda_t;
-    
+    logic i2c_scl_i, i2c_scl_o, i2c_scl_t;
+    logic i2c_sda_i, i2c_sda_o, i2c_sda_t;
+
+    logic           axi_aclk;
+    logic           axi_aresetn;    
     logic [31:0]    M00_araddr;
     logic [2:0]     M00_arprot;
     logic           M00_arready;
@@ -54,10 +46,15 @@ module top (
     logic           M00_wready;
     logic [3:0]     M00_wstrb;
     logic           M00_wvalid;
-    logic axi_aclk;
-    logic [0:0]axi_aresetn;
-    logic clk;
-    logic reset_n;    
+
+    localparam DEFAULT_PRESCALE = 1;
+    localparam FIXED_PRESCALE = 0;
+    localparam CMD_FIFO = 1;
+    localparam CMD_FIFO_DEPTH = 32;
+    localparam WRITE_FIFO = 1;
+    localparam WRITE_FIFO_DEPTH = 32;
+    localparam READ_FIFO = 1;
+    localparam READ_FIFO_DEPTH = 32;
 
     i2c_master_axil #(
         .DEFAULT_PRESCALE   (DEFAULT_PRESCALE),
@@ -69,8 +66,8 @@ module top (
         .READ_FIFO          (READ_FIFO),
         .READ_FIFO_DEPTH    (READ_FIFO_DEPTH)
     ) i2c_inst (
-        .clk            (),
-        .rst            (reset),
+        .clk            (axi_aclk),
+        .rst            (~axi_aresetn),
         // axi lite interface
         .s_axil_awaddr  (M00_araddr[3:0]),
         .s_axil_awprot  (M00_awprot),
@@ -107,8 +104,13 @@ module top (
     // Microblaze Processor Block Diagram
     system system_i (
         .clk(clk),
-        .reset_n(resetn),
+        .reset_n        (resetn),
+        //        
+        .usb_uart_rxd   (usb_uart_rxd),
+        .usb_uart_txd   (usb_uart_txd),
         //
+        .axi_aclk       (axi_aclk),
+        .axi_aresetn    (axi_aresetn),
         .M00_araddr     (M00_araddr),
         .M00_arprot     (M00_arprot),
         .M00_arready    (M00_arready),
