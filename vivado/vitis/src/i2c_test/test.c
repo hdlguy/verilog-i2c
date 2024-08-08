@@ -52,15 +52,18 @@ int main()
     xil_printf("I2C_MASTER_DATA =     0x%08x\n\r", i2c_base[I2C_MASTER_DATA]);
     xil_printf("I2C_MASTER_PRESCALE = 0x%08x\n\r", i2c_base[I2C_MASTER_PRESCALE]);
     
+    for (;;) {
+		// Clear the SHT status register
+		wr_buf[0] = 0x30; wr_buf[1] = 0x41;    
+		status = i2c_write(i2c_base, I2C_HUMIDITY, wr_buf, 2);
+		xil_printf("status = 0x%08x\n\r", status);
+		for(int i=0; i<10000000; i++); // delay
+    }
     
-//    wr_buf[0] = 0x30; wr_buf[1] = 0x41;    
+//    // Prepare to read the SHT status register
+//    wr_buf[0] = 0xF3; wr_buf[1] = 0x2D;  
 //    status = i2c_write(i2c_base, I2C_HUMIDITY, wr_buf, 2);
 //    xil_printf("status = 0x%08x\n\r", status);
-    
-    
-    wr_buf[0] = 0xF3; wr_buf[1] = 0x2D;  
-    status = i2c_write(i2c_base, I2C_HUMIDITY, wr_buf, 2);
-    xil_printf("status = 0x%08x\n\r", status);
     
 
     i2c_read(i2c_base, I2C_HUMIDITY, rd_buf, 2);
